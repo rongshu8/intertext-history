@@ -78,42 +78,71 @@ $noFile = $good; unset($noFile['regions']);
 $r4 = datapack_validate($noFile);
 ok(in_array('缺少数据文件：regions.json', $r4['warnings'], true), '缺文件给出警告而非报错');
 
-echo "\n=== 6. 旧 PHP 种子兼容 ===\n";
-$legacy = datapack_read_legacy_php();
-ok(count($legacy['dynasties']) === 25, '旧种子读到 25 个朝代');
-ok(count($legacy['cn_events']) === 117, '旧种子读到 117 个中国节点');
-ok(count($legacy['world_events']) === 669, '旧种子读到 669 条世界大事');
-ok(isset($legacy['cn_events'][0]['dynasty']), 'cn_events 仍是 dynasty slug 引用');
-ok(isset($legacy['categories'][0]['slug']), '字典表从 Schema 补齐');
-$r5 = datapack_validate($legacy, ['strict_fk' => true]);
-ok(count($r5['errors']) === 0, '旧种子能通过同一套校验（错误 ' . count($r5['errors']) . '）');
+// ---- 数据源：优先旧 PHP 种子，没有就用正式 JSON 数据包 ----
+//
+// ★ 为什么要有这个分支：旧种子 data/seed_part*.php 已被 data/seed/*.json
+//   取代并删除（v1.0 起内容只走 JSON）。**但下面的往返测试本身仍然有价值**
+//   —— 它验的是「写出去的文件能不能原样读回来、读回来还能不能通过校验」，
+//   与数据来自哪里无关。
+//   不分支的话，旧种子一删，这里就永久报红 4 项，
+//   而报的是「文件不存在」这种与测试目的无关的事。
+//   **一个永远报红的检查等于没有检查**（本项目已栽过同类：selftest 在开发目录恒红）。
+$legacyFiles = glob(dirname(__DIR__) . '/data/seed_part*.php');
+$hasLegacy = !empty($legacyFiles);
 
-echo "\n=== 7. 往返一致性（旧种子 → JSON → 校验）===\n";
+echo "\n=== 6. 旧 PHP 种子兼容 ===\n";
+if ($hasLegacy) {
+    $src = datapack_read_legacy_php();
+    ok(count($src['dynasties']) === 25, '旧种子读到 25 个朝代');
+    ok(count($src['cn_events']) === 117, '旧种子读到 117 个中国节点');
+    ok(count($src['world_events']) === 669, '旧种子读到 669 条世界大事');
+    ok(isset($src['cn_events'][0]['dynasty']), 'cn_events 仍是 dynasty slug 引用');
+    ok(isset($src['categories'][0]['slug']), '字典表从 Schema 补齐');
+    $r5 = datapack_validate($src, ['strict_fk' => true]);
+    ok(count($r5['errors']) === 0, '旧种子能通过同一套校验（错误 ' . count($r5['errors']) . '）');
+} else {
+    echo "  · 旧 PHP 种子未找到（data/seed_part*.php）—— v1.0 起内容只走 JSON，跳过\n";
+    echo "    第 7 节改用正式 JSON 数据包做往返测试\n";
+    $src = datapack_read(dirname(__DIR__) . '/data/seed');
+}
+
+echo "\n=== 7. 往返一致性（写出 JSON → 读回 → 校验）===\n";
 $dir = sys_get_temp_dir() . '/dp_test_' . getmypid();
 @mkdir($dir, 0777, true);
-// 不连库，直接把 legacy 写成 JSON 文件再读回来
+// 不连库，直接把源数据写成 JSON 文件再读回来
 $spec2 = datapack_spec();
-foreach ($legacy as $t => $rows) {
+foreach ($src as $t => $rows) {
     file_put_contents($dir . '/' . $spec2[$t]['file'],
         datapack_json(['table' => $t, 'natural_key' => $spec2[$t]['natural_key'], 'rows' => $rows]));
 }
 $back = datapack_read($dir);
 ok(count($back) === 7, '7 个文件全部读回');
 foreach ($spec2 as $t => $s) {
-    ok(count($back[$t]) === count($legacy[$t]), "$t 行数一致（" . count($back[$t]) . '）');
+    ok(count($back[$t]) === count($src[$t]), "$t 行数一致（" . count($back[$t]) . '）');
 }
 $r6 = datapack_validate($back, ['strict_fk' => true]);
 ok(count($r6['errors']) === 0, '往返后仍零错误（错误 ' . count($r6['errors']) . '）');
-// 逐行抽样比对内容
+// 逐行比对内容
+//
+// ★ 只比 spec 里声明的列，**且两边对称**。
+//   原来写的是 unset($o['descr'], $o['emoji']) —— 只从原数据删、
+//   不从读回的数据删。旧种子恰好没有这两个键时看不出问题，
+//   一旦数据源换成正式 JSON（regions 本来就带 emoji），
+//   就变成「$o 少了 emoji、$g 有 emoji」→ 必然误报。
+//   比对规则必须对两边一视同仁，否则测的是这个不对称，不是数据。
 $diff = 0;
-foreach ($legacy as $t => $rows) {
+foreach ($src as $t => $rows) {
+    $cols = $spec2[$t]['columns'];
     foreach ($rows as $i => $orig) {
-        $got = $back[$t][$i] ?? null;
-        $o = $orig; $g = $got ?: [];
-        unset($o['descr'], $o['emoji']);
-        $o = array_filter($o, function ($v) { return $v !== null; });
-        $g = array_filter($g ?: [], function ($v) { return $v !== null; });
-        if ($o != $g) { $diff++; if ($diff <= 3) { echo "    差异 $t#$i\n"; } }
+        $got = $back[$t][$i] ?? [];
+        foreach ($cols as $c) {
+            $a = isset($orig[$c]) ? (string) $orig[$c] : '';
+            $b = isset($got[$c])  ? (string) $got[$c]  : '';
+            if ($a !== $b) {
+                $diff++;
+                if ($diff <= 3) { echo "    差异 $t#$i 列 $c：「$a」≠「$b」\n"; }
+            }
+        }
     }
 }
 ok($diff === 0, '逐行内容零差异（发现 ' . $diff . ' 处）');
