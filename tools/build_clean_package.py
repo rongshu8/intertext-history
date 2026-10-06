@@ -33,12 +33,13 @@ EXCLUDE_FILES = {
     # 安全
     'config.local.php',          # 生产数据库密码
     '.gitignore',
+    # 推广文：写给公众号的，正文里有生产站点地址。
+    # 它不进运行包，但**打包器的排除清单和 .gitignore 是两套** ——
+    # 加了 .gitignore 不等于打包器会跳过，扫到就中止打包（本次实际发生）。
+    '公众号推广文.md',
 }
 
 EXCLUDE_DIRS = {
-    '_backup_20261004_210029',
-    '_backup_20261004_221805',
-    '_backup_20261004_223752',
     '.workbuddy',
     'tools',                     # 开发自检
     '__pycache__',
@@ -47,6 +48,8 @@ EXCLUDE_DIRS = {
     '.vscode',
     '_shots',                    # 截图产物
     '_preview',                  # 本地预览页
+    '_cover',                    # 封面图工作目录
+    '.venv_tmp',                 # 临时虚拟环境
 }
 
 EXCLUDE_EXT = {'.sqlite', '.sqlite-wal', '.sqlite-shm', '.pyc', '.log', '.bak', '.old'}

@@ -28,8 +28,17 @@ function ok($c, $m) {
     if (!$c) $GLOBALS['fail']++;
 }
 
-echo "=== 纯净包安装前自检 ===\n";
-echo "包目录: $root\n\n";
+echo "=== 安装前自检 ===\n";
+echo "检查目录: $root\n";
+
+// ---- 这是开发目录还是纯净包？----
+// 两种目录该跑的检查完全不同：
+//   · 纯净包  → 必须没有 config.local.php / 锁 / tools/ / 旧种子
+//   · git 仓库 → 这些**都应该有**（开发目录本来就有配置和工具）
+// 用is_file 判据自动切换，别让人手工选错模式。
+$isPackage = !is_file($root . '/config.local.php') && !is_dir($root . '/tools');
+echo "模式: " . ($isPackage ? "纯净包（发布前检查）" : "开发目录 / git 仓库")
+     . "\n\n";
 
 // ---- 1) 关键文件在位 ----
 echo "[1] 关键文件\n";
@@ -39,10 +48,19 @@ foreach (['install.php', 'inc/bootstrap.php', 'inc/datapack.php', 'inc/schema.ph
           'inc/install_gate.php', 'inc/install_precheck.php'] as $f) {
     ok(is_file($root . '/' . $f), $f);
 }
-ok(!is_file($root . '/config.local.php'), 'config.local.php 不在包里（应只有 .example）');
-// ★ 锁的路径是 data/install.lock。
-//   这里原来写的是 install.php.lock —— 路径根本不对，这个检查从来没生效过。
-ok(!is_file($root . '/data/install.lock'), '没有遗留的安装锁（data/install.lock）');
+
+// ★ 下面三项只对纯净包有意义。
+//   开发目录里 config.local.php 本来就该在（否则本地连不上库），
+//   判它"不该存在"会让自检在开发目录里全红 ——
+//   而一个永远报红的检查等于没有检查。
+if ($isPackage) {
+    ok(!is_file($root . '/config.local.php'), 'config.local.php 不在包里（应只有 .example）');
+    // ★ 锁的路径是 data/install.lock。
+    //   这里原来写的是 install.php.lock —— 路径根本不对，这个检查从来没生效过。
+    ok(!is_file($root . '/data/install.lock'), '没有遗留的安装锁（data/install.lock）');
+} else {
+    echo "  · 跳过「config.local.php 不应存在」等三项 —— 开发目录里它们本该在\n";
+}
 
 // 全新站的身份判据：包在未装状态下解出来，第一个页面必须能自动导流向导。
 // 这三条是「别人拿到包就能直接装」的最低保证 ——
@@ -78,10 +96,55 @@ ok($gateOK, '闸门以 config.local.php 的存在与否作为判据');
 //   举了个主机名来说明开放重定向，不剥注释它会把自己判成泄漏。
 $leak = [];
 $CODE_EXT = ['php', 'html', 'js', 'css', 'json'];
-$rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root));
+// ★ 扫描范围必须排除备份目录与工具产物。
+//   _backup_*/ 里有 52 份历史快照，每份都含当时的配置与探针脚本 ——
+//   它们不在暂存区、不进包，对发布没有任何意义，
+//   但递归扫描会把它们全捞进来，然后报一堆「泄漏」，
+//   而报的那些东西压根不会发布。**一个被噪声淹没的检查等于没有检查。**
+$SKIP_DIRS = ['_backup_', '_shots', '_preview', '.git', '.workbuddy', '__pycache__'];
+
+/** 路径里是否含要跳过的目录段（只看相对 root 的部分） */
+function selftest_skip_path(string $path, string $root, array $skipDirs): bool
+{
+    $rel = trim(str_replace('\\', '/', substr($path, strlen($root))), '/');
+    if ($rel === '') {
+        return false;
+    }
+    foreach (explode('/', $rel) as $seg) {
+        // ★ 必须是**前缀匹配**，不能全等。
+        //   目录名是 `_backup_20261004_210029`，而跳过表里写的是 `_backup_` ——
+        //   全等匹配永远不成立，剪枝静默失效，然后 52 份历史快照全被扫进来，
+        //   报一堆「泄漏」而那些文件压根不会发布。
+        //   （踩过：剪枝逻辑写对了，匹配方式错了，于是看起来像没生效。）
+        foreach ($skipDirs as $s) {
+            if ($s !== '' && strncmp($seg, $s, strlen($s)) === 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// 用 RecursiveCallbackFilterIterator 在**进入目录时**就剪掉整棵子树，
+// 而不是遍历到文件后再判断 —— 后者拿不到完整相对路径，
+// 早先的写法因此漏掉了备份目录（报出来的文件名还丢了路径前缀，
+// 让人误以为是根目录下的文件）。
+$dirIter = new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS);
+$filter = new RecursiveCallbackFilterIterator($dirIter, function ($cur) use ($root, $SKIP_DIRS) {
+    if ($cur->isDir()) {
+        return !selftest_skip_path($cur->getPathname(), $root, $SKIP_DIRS);
+    }
+    return true;
+});
+$rii = new RecursiveIteratorIterator($filter, RecursiveIteratorIterator::LEAVES_ONLY);
 foreach ($rii as $f) {
     if (!$f->isFile() || $f->getSize() > 2 * 1024 * 1024) continue;
     if (!in_array(strtolower($f->getExtension()), $CODE_EXT, true)) continue;
+    // ★ config.local.php 必然含生产库信息与域名 —— 那是它的用途。
+    //   它已被 .gitignore 排除、永不进包，所以这道检查要跳过它。
+    //   （不跳的话：开发目录里恒报红，纯净包里本来就没这个文件，
+    //     检查等于永远抓不到任何东西。）
+    if ($f->getFilename() === 'config.local.php') continue;
     $txt = (string) @file_get_contents($f->getPathname());
     // 剥掉注释再匹配 —— 只在会被执行的代码里查，才是真风险。
     $txt = preg_replace('~/\*.*?\*/~s', ' ', $txt);
@@ -120,11 +183,15 @@ ok(empty($gateIssues), '前台页均在 bootstrap 之前引入安装闸门'
     . ($gateIssues ? '：' . implode('；', $gateIssues) : ''));
 
 echo "\n[2] 敏感文件不在包内\n";
-foreach (['cccc.txt', 'data/history.sqlite'] as $f) {
-    ok(!is_file($root . '/' . $f), $f);
-}
-foreach (['tools', '.workbuddy'] as $d) {
-    ok(!is_dir($root . '/' . $d), $d . '/');
+if ($isPackage) {
+    foreach (['cccc.txt', 'data/history.sqlite'] as $f) {
+        ok(!is_file($root . '/' . $f), $f);
+    }
+    foreach (['tools', '.workbuddy'] as $d) {
+        ok(!is_dir($root . '/' . $d), $d . '/');
+    }
+} else {
+    echo "  · 跳过 —— 开发目录里 tools/（自检脚本）与配置文件本就该在\n";
 }
 
 echo "\n[3] 数据文件完整\n";
@@ -147,8 +214,15 @@ foreach ($expect as $t => $n) {
 }
 
 echo "\n[4] 旧 PHP 种子已剔除，且不影响装载\n";
-$legacy = glob($root . '/data/seed_part*.php');
-ok(empty($legacy), '包内没有 data/seed_part*.php（' . count($legacy) . ' 个）');
+// 开发目录里这些文件还留在磁盘上（只是不再跟踪、不进包），
+// 所以这一项只对纯净包有意义 —— 而且它真正的价值是
+// **证明 JSON 路径能走通**（下面那行才是关键）。
+if ($isPackage) {
+    $legacy = glob($root . '/data/seed_part*.php');
+    ok(empty($legacy), '包内没有 data/seed_part*.php（' . count($legacy) . ' 个）');
+} else {
+    echo "  · 旧种子是否在包内：跳过（开发目录保留它们作为历史参考）\n";
+}
 
 // 期望行数从 manifest.json 读，**不要写死数字** ——
 // 写死过一次（硬编码 669），结果内容一更新自检反而误报失败，
