@@ -41,7 +41,16 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 不上传的文件/目录
 SKIP_NAMES = {'.git', '.idea', '.vscode', '__pycache__', '.DS_Store', 'Thumbs.db',
-              '.workbuddy', '.user.ini'}   # .user.ini 是服务器特有配置，绝不能覆盖
+              '.workbuddy',
+              # 服务器特有配置，绝不能覆盖
+              '.user.ini',
+              # ★ config.local.php 是**每台机器各自一份**的配置：
+              #   线上那份的库名/库密码/持久连接开关可能和本地不同
+              #   （本项目换过库名）。本地这份一旦过期，传上去会直接覆盖线上配置
+              #   → 站点立刻连不上库，而报错指向 PDO 连接失败、
+              #   不是"配置被覆盖"，排查方向容易被带偏。
+              #   线上本来就有这份且是对的，不该由部署脚本管理它。
+              'config.local.php'}
 # 注意：不要在这里排 '.json' —— data/seed/*.json 是内容数据，必须上传。
 # （此前把 .json 排掉导致数据包传不上去，install 只能回退读旧 PHP 种子。）
 SKIP_EXT = {'.pyc', '.log', '.bak', '.old', '.sqlite', '.sqlite-wal', '.sqlite-shm'}
