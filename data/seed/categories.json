@@ -1,0 +1,102 @@
+{
+    "table": "categories",
+    "natural_key": "slug",
+    "rows": [
+        {
+            "slug": "politics",
+            "name": "政治制度",
+            "color": "#4c6ef5",
+            "sort": 0
+        },
+        {
+            "slug": "war",
+            "name": "战争军事",
+            "color": "#e03131",
+            "sort": 10
+        },
+        {
+            "slug": "science",
+            "name": "科技发明",
+            "color": "#0ca678",
+            "sort": 20
+        },
+        {
+            "slug": "literature",
+            "name": "文学出版",
+            "color": "#7048e8",
+            "sort": 30
+        },
+        {
+            "slug": "explore",
+            "name": "探索地理",
+            "color": "#1098ad",
+            "sort": 40
+        },
+        {
+            "slug": "culture",
+            "name": "艺术人文",
+            "color": "#f76707",
+            "sort": 40
+        },
+        {
+            "slug": "religion",
+            "name": "宗教信仰",
+            "color": "#c2255c",
+            "sort": 70
+        },
+        {
+            "slug": "economy",
+            "name": "经济金融",
+            "color": "#2f9e44",
+            "sort": 70
+        },
+        {
+            "slug": "society",
+            "name": "社会民生",
+            "color": "#495057",
+            "sort": 80
+        },
+        {
+            "slug": "disaster",
+            "name": "灾害疫情",
+            "color": "#868e96",
+            "sort": 90
+        },
+        {
+            "slug": "music",
+            "name": "音乐戏曲",
+            "color": "#d6336c",
+            "sort": 50
+        },
+        {
+            "slug": "philosophy",
+            "name": "思想哲学",
+            "color": "#862e9c",
+            "sort": 60
+        },
+        {
+            "slug": "medicine",
+            "name": "医药卫生",
+            "color": "#20c997",
+            "sort": 110
+        },
+        {
+            "slug": "astronomy",
+            "name": "天文历法",
+            "color": "#4263eb",
+            "sort": 120
+        },
+        {
+            "slug": "education",
+            "name": "教育制度",
+            "color": "#f59f00",
+            "sort": 130
+        },
+        {
+            "slug": "architecture",
+            "name": "建筑工程",
+            "color": "#845ef7",
+            "sort": 140
+        }
+    ]
+}

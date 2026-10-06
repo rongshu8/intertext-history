@@ -1,0 +1,906 @@
+/* ==========================================================================
+   responsive.css —— 多终端自适应（统一层）
+   ---------------------------------------------------------------------------
+   为什么要单独一个文件：
+     style.css / timeline.css / admin.css 各自只管一两个断点，
+     断点值互不一致（780 / 860 / 900），且都缺「超宽屏」与「小平板」。
+     这个文件把所有终端尺寸集中处理，改一次全局生效。
+
+   断点体系（自下而上覆盖，顺序不能乱）：
+     ≥1600px  超宽屏 / 大桌面   —— 放大容器与主轴留白
+     ≥1280px  桌面              —— 基础布局（各 CSS 已有）
+     ≤1100px  小平板 / 笔电竖屏 —— 时间轴提前切单列
+     ≤860px   平板              —— 后台栅格降列、表格卡片化
+     ≤640px   手机              —— 单列、导航折叠、表格横向滚动
+     ≤380px   超窄机（iPhone SE 一代等）—— 进一步压缩留白与字号
+
+   加载顺序：放在 style.css / timeline.css / admin.css **之后**，
+   因为本文件靠「同级选择器 + 相同或更高权重」覆盖，必须后加载。
+   ========================================================================== */
+
+/* ==========================================================================
+   1. 基础：所有终端都生效的安全默认值
+   ========================================================================== */
+
+html {
+    /* 让 -webkit-text-size-adjust 不参与计算，避免 iOS 横屏时字号被放大 */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    /* iOS Safari 横屏时的溢出兜底 */
+    overflow-x: hidden;
+}
+
+/* 可点击元素在触屏上不应有 hover 残留，也避免 300ms 延迟 */
+@media (hover: none) {
+    a,
+    button,
+    .btn,
+    .ev-card,
+    .tl-year,
+    .site-nav a {
+        transition: none !important;
+    }
+    /* 触屏上 :hover 会「粘住」，强制清除常见可点击元素的 hover 效果 */
+    a:hover,
+    button:hover {
+        color: inherit;
+    }
+    .btn:hover {
+        filter: none;
+    }
+}
+
+/* 图片、表格、代码块等一律不撑破容器 —— 这是横向滚动最大的元凶 */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    height: auto;
+}
+
+pre,
+code {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+table {
+    max-width: 100%;
+}
+
+/* 长英文/长 URL 不撑破布局 */
+.wrap,
+main,
+.card,
+.acard {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ==========================================================================
+   2. 超宽屏 / 大桌面（≥1600px）
+   ========================================================================== */
+
+@media (min-width: 1600px) {
+    :root {
+        /* 变量在 style.css 定义，这里覆盖需要 :root 也参与 */
+        --wrap: 1440px;
+    }
+
+    .wrap {
+        max-width: 1440px;
+        padding: 0 40px;
+    }
+
+    /* 时间轴主轴加宽，两侧卡片能放下更多文字 */
+    .tl-row {
+        grid-template-columns: 1fr 148px 1fr;
+        gap: 0 30px;
+    }
+
+    .node-hero-year .big {
+        font-size: 40px;
+    }
+
+    .ev-card .ev-title {
+        font-size: 17px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .wrap {
+        max-width: 1560px;
+    }
+
+    .tl-row {
+        grid-template-columns: 1fr 164px 1fr;
+    }
+}
+
+/* ==========================================================================
+   3. 小平板 / 笔电竖屏（≤1100px）
+   --------------------------------------------------------------------------
+   timeline.css 自己有个 900px 断点才切单列。这里在 1100px 就先压缩主轴，
+   避免 901–1100px 这个区间里三列布局被挤到每列不足 280px。
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+    :root {
+        --wrap: 1040px;
+    }
+
+    .tl-row {
+        grid-template-columns: 1fr 112px 1fr;
+        gap: 0 20px;
+    }
+
+    .tl-year {
+        font-size: 13px;
+    }
+
+    .wl-row {
+        grid-template-columns: 118px 1fr;
+        gap: 14px;
+    }
+
+    .node-hero-year .big {
+        font-size: 30px;
+    }
+
+    /* 后台表格在窄一点的桌面已经开始吃力 */
+    .admin-nav a {
+        padding: 6px 11px;
+        font-size: 13.5px;
+    }
+}
+
+/* ==========================================================================
+   4. 平板（≤860px）
+   --------------------------------------------------------------------------
+   与 admin.css 原有断点对齐。这里负责前台 + 后台的公共收敛。
+   ========================================================================== */
+
+@media (max-width: 860px) {
+    :root {
+        --wrap: 760px;
+    }
+
+    .wrap {
+        padding: 0 18px;
+    }
+
+    /* 首页的双栏 hero 收成单栏 */
+    .hero-inner {
+        grid-template-columns: 1fr;
+        gap: 26px;
+    }
+
+    /* 页脚：现在只有「关于内容」一栏，栅格已改为 1fr，这里只收间距。
+       ⚠️ 别再写 grid-template-columns: 1fr 1fr —— 单栏内容会被压成半宽。 */
+
+    /* 节点详情：英雄区与右侧栏堆叠 */
+    .node-hero,
+    .node-layout {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    /* 世界大事双列收单列 */
+    .world-group,
+    .wl-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    /* 后台概览统计块：四列降两列 */
+    .stat-grid,
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* 后台表格：窄屏下允许横向滚动而不是把布局撑破 */
+    .table-scroll,
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+
+    .table-scroll table,
+    .table-wrap table {
+        min-width: 560px;
+    }
+}
+
+/* ==========================================================================
+   5. 手机（≤640px）
+   ========================================================================== */
+
+@media (max-width: 640px) {
+    :root {
+        --wrap: 640px;
+    }
+
+    html {
+        font-size: 15px;
+    }
+
+    .wrap {
+        padding: 0 14px;
+    }
+
+    /* ---- 顶部导航：横向滚动，避免挤成两行 ---- */
+    .site-header .header-inner {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 0 0;
+    }
+
+    .brand-text strong {
+        font-size: 16px;
+    }
+
+    .brand-text em {
+        /* 副标题在手机上是最先该让位的 */
+        display: none;
+    }
+
+    .site-nav {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 2px;
+        padding-bottom: 2px;
+    }
+
+    .site-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .site-nav a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 7px 11px;
+        font-size: 13.5px;
+    }
+
+    /* ---- 页脚单列 ---- */
+    .footer-inner {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    /* ---- 表单：栅格降单列，标签不再挤在左侧 ---- */
+    .grid-2,
+    .grid-3,
+    .grid-4,
+    .stat-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .afield {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+
+    .afield label {
+        font-size: 12.5px;
+    }
+
+    /* 输入框在 iOS 上字号小于 16px 会触发自动放大，强制 16px */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+
+    /* ---- 筛选栏纵向排列 ---- */
+    /* 注意：不要在这里把 .filter-bar 设成 column ——
+       筛选栏在 §12 里是折叠面板，chip 需要保持横向换行排列。
+       改成 column 会让每个 chip 独占一行（25 个朝代 = 25 屏）。
+       只有 window-bar 需要纵向排列。 */
+    .window-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .filter-bar .btn,
+    .window-bar a {
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* ---- 后台概览卡片双列（单列会显得太空）---- */
+    .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .admin-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-nav a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    /* ---- 表格最小宽度再降一点，尽量少横向滚动 ---- */
+    .table-scroll table,
+    .table-wrap table {
+        min-width: 480px;
+    }
+
+    /* ---- 卡片内边距收窄 ---- */
+    .card,
+    .acard {
+        padding: 16px 14px;
+        border-radius: 8px;
+    }
+
+    /* ---- 弹层按钮撑满，触屏更好点 ---- */
+    .modal-foot .btn,
+    .aform .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ==========================================================================
+   6. 超窄机（≤380px）—— iPhone SE / 老安卓
+   ========================================================================== */
+
+@media (max-width: 380px) {
+    html {
+        font-size: 14px;
+    }
+
+    .wrap {
+        padding: 0 11px;
+    }
+
+    .brand-mark {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+
+    .brand-text strong {
+        font-size: 15px;
+    }
+
+    .site-nav a {
+        padding: 7px 9px;
+        font-size: 13px;
+    }
+
+    .stat-grid {
+        gap: 8px;
+    }
+
+    .card,
+    .acard {
+        padding: 14px 12px;
+    }
+}
+
+/* ==========================================================================
+   7. 横屏矮屏（手机横放）
+   --------------------------------------------------------------------------
+   竖屏断点已把布局改成单列，横屏时纵向空间极小，
+   需要压掉多余留白，否则内容被挤到看不见。
+   ========================================================================== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .site-header {
+        position: static;   /* 避免固定头部吃掉一半屏幕 */
+    }
+
+    .hero {
+        padding: 18px 0 10px;
+    }
+
+    .login-card,
+    .reg-card {
+        padding: 18px 20px;
+    }
+}
+
+/* ==========================================================================
+   9. 触控命中区优化
+   --------------------------------------------------------------------------
+   实测发现（tools/verify_responsive.py，60 组终端×页面）：
+     - 世界大事列表页 40 个标题链接高度仅 20px（.wl-title a）
+     - 节点页的 .tag 徽章高 22px
+     - 注册/登录页的「去登录」「立即注册」高 17px
+   这些在手机上难点中（Apple HIG 建议 ≥44px，Material 建议 ≥48px）。
+   做法：扩大 padding 让命中区变大，同时用负 margin 抵消，
+   保证视觉排版不变 —— 这是「扩大热区不改变布局」的标准手法。
+   ========================================================================== */
+
+/* 世界大事列表的标题链接：整行可点 */
+.wl-title a {
+    display: inline-block;
+    padding: 5px 4px;
+    margin: -5px -4px;
+}
+
+/* 节点页 / 卡片上的徽章链接 */
+a.tag,
+.tag a {
+    display: inline-flex;
+    padding: 5px 10px;
+    margin: -4px -6px;
+    min-height: 28px;
+}
+
+/* 面包屑式的「← 返回」「去登录」「立即注册」等行内小链接。
+   注意：它们在 </form> 之后，是 .login-wrap 的直接子 <p>，
+   所以选择器要写 .login-wrap > p a（后代选择器也会命中，但要更精确）。 */
+.login-wrap > p a,
+.login-card p a,
+.reg-card p a,
+a.backlink,
+.acard .region-head a {
+    display: inline-block;
+    padding: 7px 8px;
+    margin: -7px -8px;
+    min-height: 32px;
+    line-height: 18px;
+    border-radius: 4px;
+}
+
+/* 悬停时给一点反馈，扩大后不至于「点了没反应」 */
+.login-wrap > p a:hover,
+.login-card p a:hover {
+    background: rgba(192, 57, 43, .06);
+}
+
+/* 节点页 / 首页的联动卡：标题是行内链接，热区只有一行文字高。
+   .wtitle 是「同期世界大事」区，.lt-title 是「中外联动」区 —— 两处都是裸 <a>。 */
+.link-panel .lt-title a,
+.wtitle a,
+.ev-body a,
+.card a:not(.btn):not(.chip) {
+    /* 扩大热区但不改变视觉：负 margin 抵消多出的 padding */
+    padding: 6px 5px;
+    margin: -6px -5px;
+    display: inline;
+    border-radius: 4px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+
+.link-panel .lt-title a:hover,
+.wtitle a:hover,
+.ev-body a:hover {
+    background: rgba(76, 110, 245, .07);
+}
+
+/* 顶部的「注册」「登录」等导航内链 */
+.site-nav a,
+.admin-nav a {
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* ---- 输入框字号：iOS Safari 对 <16px 的输入框会自动放大整页 ----
+   用户一旦聚焦输入框，页面会横向/纵向跳动，体验很差。
+   手机端统一锁 16px；平板与桌面保持原字号（不受影响）。 */
+@media (max-width: 860px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* ==========================================================================
+   10. 输入框无障碍：聚焦时高亮，别让键盘用户摸不着焦点
+   ========================================================================== */
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--indigo, #4c6ef5);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* ==========================================================================
+   11. 打印（保留，内容自适应纸张）
+   ========================================================================== */
+
+@media print {
+    .site-nav,
+    .footer-inner,
+    .window-bar,
+    .filter-bar,
+    .btn,
+    .pager {
+        display: none !important;
+    }
+
+    .wrap {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 11px;
+        color: #666;
+    }
+}
+
+/* ==========================================================================
+   11b. 卡片内年份（.tl-year-in）：默认隐藏
+   --------------------------------------------------------------------------
+   index.php 在中国节点卡片内额外输出了一份年份（.tl-year-in），
+   专供窄屏使用 —— 那里没有独立的年份列。
+   桌面端时间轴有主轴年份（.tl-node 里的竖排/横排年份），
+   若两份都显示就会出现重复，所以桌面端必须隐藏卡片内那份。
+   ========================================================================== */
+
+.tl-year-in { display: none; }
+
+/* ==========================================================================
+   12. 移动端筛选面板折叠
+   --------------------------------------------------------------------------
+   移动端 25 个朝代 + 10 个主题的 chip 平铺会占掉两三屏，把时间轴全推到
+   折叠线以下 —— 而时间轴才是这个页面的主体。
+   做法：窄屏收成一行「筛选」按钮，点开才展开面板；
+   桌面端（≥901px）面板恒开、按钮隐藏。
+   ========================================================================== */
+
+/* ---- 折叠按钮 ---- */
+.filter-toggle {
+    display: none;                 /* 桌面端隐藏 */
+    width: 100%;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    margin: 22px 0 0;
+    background: var(--paper-2);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-sm, 6px);
+    font-size: 14px;
+    color: var(--ink-2);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.filter-toggle:active { background: var(--paper, #fff); }
+
+/* 三横线 → 展开后变箭头 */
+.ft-icon {
+    flex: 0 0 auto;
+    width: 15px; height: 11px;
+    background:
+        linear-gradient(var(--ink-2) 0 0) 0 0 / 100% 1.5px no-repeat,
+        linear-gradient(var(--ink-2) 0 0) 0 4.75px / 100% 1.5px no-repeat,
+        linear-gradient(var(--ink-2) 0 0) 0 9.5px / 100% 1.5px no-repeat;
+}
+
+.ft-text { font-weight: 600; flex: 0 0 auto; }
+
+/* 当前筛选摘要，超长省略 */
+.ft-summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 已选条件的角标 */
+.ft-count {
+    flex: 0 0 auto;
+    min-width: 18px; height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--cinnabar, #c0392b);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.filter-toggle.has-filter .ft-text { color: var(--cinnabar, #c0392b); }
+
+/* 展开态：图标变下箭头 */
+.filter-wrap.open .filter-toggle {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: var(--line-2);
+    border-bottom-color: transparent;
+}
+/* 展开态：三横线收成一个上箭头。
+   用 ::after 画 V 字形（两条 border 旋转），比叠 gradient 再 rotate 可靠 ——
+   后者在 1.5px 细线时两条会完全重合，rotate 后看起来就是一根斜杠。 */
+.filter-wrap.open .ft-icon {
+    background: transparent;
+    position: relative;
+}
+.filter-wrap.open .ft-icon::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 1px;
+    width: 9px;
+    height: 9px;
+    border-left: 1.8px solid var(--cinnabar, #c0392b);
+    border-top: 1.8px solid var(--cinnabar, #c0392b);
+    transform: rotate(45deg);
+    transition: transform .18s;
+}
+
+@media (max-width: 900px) {
+    .filter-toggle { display: flex; }
+
+    /* 面板默认折叠 */
+    .filter-panel { display: none; }
+    .filter-wrap.open .filter-panel { display: block; }
+
+    .filter-panel {
+        border: 1px solid var(--line-2);
+        border-top: none;
+        border-radius: 0 0 var(--radius-sm, 6px) var(--radius-sm, 6px);
+        background: var(--paper-2);
+        padding: 4px 12px 12px;
+    }
+
+    /* 去掉原本两条 bar 各自的 border-top，改为只在面板内部用分隔线 */
+    .filter-panel .filter-bar {
+        border-top: none;
+        padding: 12px 0 10px;
+        margin-top: 0;
+        align-items: center;
+        align-content: flex-start;
+    }
+    .filter-panel .filter-bar + .filter-bar {
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+    }
+
+    /* 面板内 chip 换行排列。
+       ⚠️ 这里踩过两个坑，都表现为「每个 chip 独占一整行，25 个朝代要滚 25 屏」：
+         1. width: fit-content —— 作为 flex item 会被 flex-basis 覆盖而失效
+         2. 只改 .filter-panel 的 display —— 它包着两条 .filter-bar，
+            改成 flex 会让两条 bar 变成并列 flex item，结构就错了
+       真正决定是否拉伸的是 flex-grow/flex-basis，必须显式归零。 */
+    .filter-panel .chip {
+        font-size: 13px;
+        padding: 6px 12px;
+        max-width: 100%;
+        flex: 0 0 auto;          /* 不伸长、不换行内压缩 */
+        align-self: flex-start;
+    }
+
+    /* 「仅关键节点」在窄屏收起左侧留白（换行后本来就会另起一行） */
+    .filter-panel .chip-alt { margin-left: 0; }
+}
+
+/* ==========================================================================
+   13. 移动端时间轴重排（修错位）
+   --------------------------------------------------------------------------
+   原移动端布局的问题（用户反馈「错位」的实际原因）：
+     1. .tl-cards.left 与 .tl-cards.right 都是 grid-row:1，叠在同一网格单元，
+        靠 padding 差值错开。这个技巧在「左 1 张 + 右 4 张、且摘要长短不一」
+        时必然对不齐 —— 圆点位置按固定 padding-top 算，与卡片实际顶端无关。
+     2. 每行渲染 1 个中国节点 + 4 条世界大事 = 5 张卡片，还带摘要正文，
+        单行高度可达 500px+，竖排年份 max-height:190px 被截断，
+        视觉上就是「年份飘在半空、圆点插在卡片中间」。
+     3. 年份是竖排（writing-mode），在手机上要转脖子看，且容易与卡片文字混淆。
+
+   改法（窄屏 ≤640px）：
+     - 年份从竖排改为「横向标签 + 主轴圆点」，去掉竖排与 max-height 截断
+     - 中国节点与同期世界大事合并成一张卡，用小标题分隔，去掉重复的分类/地区标签
+     - 世界大事限 2 条（服务器侧按 UA 减量，见 index.php），其余折叠成「+N」
+     - 摘要正文在窄屏隐藏（详情页有完整内容）
+   ========================================================================== */
+
+@media (max-width: 640px) {
+    /* ---- 时间轴主轴：移到左侧，圆点随卡片顶端对齐 ---- */
+    .timeline { padding-left: 0; }
+    .timeline::before {
+        left: 9px;
+        margin-left: 0;
+        width: 2px;
+        background: var(--line-2);
+    }
+
+    .tl-row {
+        grid-template-columns: 1fr;      /* 完全单列 */
+        gap: 0;
+        margin-bottom: 14px;
+        padding-left: 26px;             /* 给主轴留位置 */
+        position: relative;
+    }
+
+    /* 年份已在窄屏移入卡片内（.tl-year-in），所以这里的独立年份列
+       连同主轴一起隐藏 —— 这从根本上消灭了「年份与卡片错位」：
+       不再是两个独立网格项对齐，而是一个元素。
+       .tl-cards 补上 padding-left 来给主轴留位。 */
+    .tl-node { display: none; }
+
+    /* ---- 年份：卡片内的横排标签，取代竖排 ---- */
+    .tl-year-in {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        padding: 2px 7px;
+        margin-bottom: 5px;
+        background: var(--ink);
+        color: var(--paper-2);
+        border-radius: 4px;
+        font-variant-numeric: tabular-nums;
+        font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+    }
+    .tl-row.key .tl-year-in { background: var(--cinnabar); }
+
+    /* ---- 两侧卡片：同列纵向排列 ----
+       ⚠️ 两块都是 grid-column:1 时必须给不同的 grid-row，
+          否则它们会叠在同一格 —— 表现为「中国节点卡消失，只剩世界大事」。
+          这个坑与最初 desktop 上 left/right 同为 row:1 是同一类。 */
+    .tl-cards.left,
+    .tl-cards.right {
+        grid-column: 1;
+        align-items: stretch;
+        text-align: left;
+        padding: 0;
+        gap: 6px;
+        width: 100%;
+        min-width: 0;
+        /* 主轴留位已由 .tl-row 的 padding-left 提供，这里不再重复加 */
+        padding-left: 0;
+    }
+    /* 中国节点卡在第 1 行，同期世界大事在第 2 行 —— 顺序与视觉一致 */
+    .tl-cards.left  { grid-row: 1; }
+    .tl-cards.right { grid-row: 2; }
+    /* 中国节点卡在窄屏作为主卡：更醒目 */
+    .tl-cards.left .ev-card {
+        border-left: 3px solid var(--ink-3);
+    }
+    .tl-cards.left .ev-card.key {
+        border-left: 3px solid var(--cinnabar);
+    }
+    .tl-cards.left .ev-title { justify-content: flex-start; }
+    .tl-cards.left .ev-meta { justify-content: flex-start; }
+
+    /* ---- 卡片减重 ---- */
+    .tl-row .ev-card {
+        padding: 9px 12px;
+        border-radius: 7px;
+    }
+    .tl-row .ev-title {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 2px;
+    }
+    .tl-row .ev-card.world .ev-title { font-size: 13px; }
+
+    /* 摘要正文在窄屏隐藏 —— 完整内容在节点页 */
+    .tl-row .ev-sum { display: none; }
+
+    /* 元信息压到 11px，一行放得下 */
+    .tl-row .ev-meta {
+        font-size: 11px;
+        gap: 5px;
+        margin-bottom: 0;
+    }
+
+    /* 同期世界大事区块加一条细分隔线，与中国节点卡视觉分层 */
+    .tl-cards.left { margin-bottom: 4px; }
+    .tl-cards.left::after {
+        content: '';
+        display: block;
+        width: 34px;
+        height: 1px;
+        background: var(--line-2);
+        margin: 8px 0 8px 2px;
+    }
+    /* 无世界大事时的虚线提示占位 */
+    .tl-cards.right > .ev-card[style*="dashed"] { display: none; }
+    .tl-cards.right:empty { display: none; }
+
+    /* 「查看全部同期大事」按钮占满宽度，好点 */
+    .tl-cards.right .btn-ghost {
+        align-self: stretch !important;
+        text-align: center;
+        justify-content: center;
+        padding: 7px 12px;
+        font-size: 12.5px;
+    }
+
+    /* ---- 朝代分段标题减重 ---- */
+    .dyn-head {
+        margin: 26px 0 12px;
+        padding-left: 26px;           /* 与 .tl-row 的 padding-left 一致 */
+    }
+    .dyn-note {
+        padding: 0 16px 0 26px;
+        font-size: 12.5px;
+        margin-bottom: 10px;
+    }
+    /* 朝代摘要里那句话太长会挤占手机屏，限两行 */
+    .dyn-note {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+/* ==========================================================================
+   13b. 平板（641–900px）：与手机同策略
+   --------------------------------------------------------------------------
+   同样把年份移入卡片、隐藏独立年份列。平板竖屏时竖排年份也要转脖子看，
+   且 190px 的 max-height 截断会造成明显错位 —— 与手机是同一个问题，
+   所以用同一套解法，不做两套。
+   ========================================================================== */
+@media (min-width: 641px) and (max-width: 900px) {
+    .tl-node { display: none; }
+
+    .tl-year-in {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        padding: 2px 7px;
+        margin-bottom: 5px;
+        background: var(--ink);
+        color: var(--paper-2);
+        border-radius: 4px;
+        font-variant-numeric: tabular-nums;
+        font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+    }
+    .tl-row.key .tl-year-in { background: var(--cinnabar); }
+
+    .tl-cards.left, .tl-cards.right {
+        grid-column: 2;
+        padding-left: 8px;
+        padding-top: 0;
+    }
+    .tl-cards.left  { grid-row: 1; }
+    .tl-cards.right { grid-row: 2; }
+    .tl-cards.left { margin-bottom: 6px; }
+    .tl-cards.left::after {
+        content: '';
+        display: block;
+        width: 30px; height: 1px;
+        background: var(--line-2);
+        margin: 6px 0;
+    }
+    .tl-row .ev-sum { display: none; }
+    .tl-cards.right > .ev-empty { display: none; }
+    .tl-cards.right:empty { display: none; }
+}

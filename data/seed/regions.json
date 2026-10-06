@@ -1,0 +1,72 @@
+{
+    "table": "regions",
+    "natural_key": "slug",
+    "rows": [
+        {
+            "slug": "east_asia",
+            "name": "东亚",
+            "emoji": "🏯",
+            "sort": 0
+        },
+        {
+            "slug": "south_asia",
+            "name": "南亚",
+            "emoji": "🕉",
+            "sort": 20
+        },
+        {
+            "slug": "west_asia",
+            "name": "中东与西亚",
+            "emoji": "🕌",
+            "sort": 20
+        },
+        {
+            "slug": "europe",
+            "name": "欧洲",
+            "emoji": "🏛",
+            "sort": 30
+        },
+        {
+            "slug": "north_america",
+            "name": "北美",
+            "emoji": "🗽",
+            "sort": 40
+        },
+        {
+            "slug": "latam",
+            "name": "拉丁美洲",
+            "emoji": "🌎",
+            "sort": 50
+        },
+        {
+            "slug": "africa",
+            "name": "非洲",
+            "emoji": "🌍",
+            "sort": 60
+        },
+        {
+            "slug": "oceania",
+            "name": "大洋洲与极地",
+            "emoji": "🐧",
+            "sort": 70
+        },
+        {
+            "slug": "global",
+            "name": "全球",
+            "emoji": "🌐",
+            "sort": 80
+        },
+        {
+            "slug": "southeast_asia",
+            "name": "东南亚",
+            "emoji": "🛕",
+            "sort": 10
+        },
+        {
+            "slug": "central_asia",
+            "name": "中亚与草原",
+            "emoji": "🐎",
+            "sort": 40
+        }
+    ]
+}

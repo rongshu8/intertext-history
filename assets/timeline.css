@@ -1,0 +1,470 @@
+/* ==========================================================================
+   时间轴：中央主轴 + 左右分栏（中国 / 世界）
+   ========================================================================== */
+
+.timeline {
+  position: relative;
+  padding: 8px 0 40px;
+}
+
+/* --- 中央主轴 --- */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: linear-gradient(to bottom,
+    transparent 0, var(--line-2) 3%, var(--line-2) 97%, transparent 100%);
+  z-index: 0;
+}
+
+/* --- 朝代分段标题 --- */
+.dyn-head {
+  position: relative;
+  display: flex; align-items: center; gap: 14px;
+  margin: 40px 0 22px;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.dyn-head.in { opacity: 1; transform: none; }
+.dyn-head::before, .dyn-head::after {
+  content: '';
+  flex: 1; height: 1px; background: var(--line-2);
+}
+.dyn-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  box-shadow: var(--sh-1);
+  white-space: nowrap;
+}
+.dyn-badge .dot {
+  width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px;
+}
+.dyn-badge b { font-size: 15px; letter-spacing: .5px; }
+.dyn-badge .span {
+  font-size: 11.5px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", Consolas, monospace;
+}
+.dyn-note {
+  width: 100%; max-width: 720px; margin: -8px auto 20px;
+  text-align: center; font-size: 13px; color: var(--muted);
+  line-height: 1.7;
+}
+
+/* --- 单个节点行 --- */
+.tl-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 128px 1fr;
+  gap: 0 18px;
+  margin-bottom: 20px;
+  z-index: 1;
+  /* 入场动画初始态 */
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .45s ease, transform .45s ease;
+}
+.tl-row.in { opacity: 1; transform: none; }
+
+/* 主轴上的节点圆点 */
+.tl-node {
+  grid-column: 2;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start;
+  padding-top: 16px;
+  position: relative;
+}
+.tl-node::after {
+  content: '';
+  position: absolute;
+  top: 26px; left: 50%;
+  width: 11px; height: 11px; margin-left: -5.5px;
+  background: var(--paper);
+  border: 2px solid var(--ink-3);
+  border-radius: 50%;
+  z-index: 3;
+  transition: all .2s;
+}
+.tl-row.key .tl-node::after {
+  width: 15px; height: 15px; margin-left: -7.5px; top: 24px;
+  background: var(--cinnabar);
+  border-color: var(--cinnabar);
+  box-shadow: 0 0 0 4px rgba(178,58,44,.14);
+}
+.tl-year {
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.3;
+}
+.tl-row.key .tl-year { color: var(--cinnabar); }
+
+/* 卡片容器 */
+.tl-cards {
+  display: flex; flex-direction: column; gap: 8px;
+  padding-top: 8px;
+}
+.tl-cards.left  { grid-column: 1; grid-row: 1; align-items: flex-end; text-align: right; }
+.tl-cards.right { grid-column: 3; grid-row: 1; align-items: flex-start; }
+
+/* --- 事件卡片 --- */
+.ev-card {
+  display: block;
+  max-width: 100%;
+  padding: 11px 15px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--sh-1);
+  color: var(--ink);
+  transition: box-shadow .18s, border-color .18s, transform .18s;
+  position: relative;
+}
+.ev-card:hover {
+  box-shadow: var(--sh-2);
+  border-color: var(--ink-3);
+  transform: translateY(-1px);
+  color: var(--ink);
+}
+.tl-cards.left .ev-card:hover { transform: translateY(-1px) translateX(-2px); }
+
+.ev-title {
+  font-size: 14.5px; font-weight: 600; line-height: 1.5;
+  margin-bottom: 3px;
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.tl-cards.left .ev-title { justify-content: flex-end; }
+.ev-card.world .ev-title { font-size: 13.5px; font-weight: 500; }
+
+.ev-meta {
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--muted); margin-bottom: 4px;
+}
+.tl-cards.left .ev-meta { justify-content: flex-end; }
+.ev-place { color: var(--ink-3); }
+
+.ev-sum {
+  font-size: 13px; color: var(--ink-3); line-height: 1.7;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.ev-card.key { border-left: 3px solid var(--cinnabar); }
+.tl-cards.left .ev-card.key { border-left: 1px solid var(--line); border-right: 3px solid var(--cinnabar); }
+
+.ev-key-badge {
+  font-size: 10px; color: var(--cinnabar); font-weight: 700;
+  letter-spacing: .5px;
+}
+
+/* --- 分类色条 --- */
+.cat-strip {
+  width: 3px; align-self: stretch; border-radius: 2px;
+  flex: 0 0 3px;
+}
+
+/* ==========================================================================
+   节点详情页
+   ========================================================================== */
+
+.node-hero {
+  display: grid; grid-template-columns: auto 1fr; gap: 22px;
+  padding: 30px 0 26px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.node-hero-year {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 120px; padding-right: 22px;
+  border-right: 1px solid var(--line);
+}
+.node-hero-year .big {
+  font-size: 26px; font-weight: 700; line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  letter-spacing: -1px;
+  color: var(--cinnabar);
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+}
+.node-hero-body h1 { font-size: clamp(22px, 3.4vw, 31px); margin-bottom: 10px; }
+.node-hero-body .sum { font-size: 15.5px; color: var(--ink-2); line-height: 1.85; }
+.node-meta-row {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+}
+
+.node-detail {
+  font-size: 15px; line-height: 1.95; color: var(--ink-2);
+  white-space: pre-wrap;
+  margin: 16px 0;
+}
+
+.node-figs {
+  padding: 12px 16px; margin: 16px 0;
+  background: rgba(178,58,44,.045);
+  border-left: 3px solid var(--cinnabar);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13.5px;
+}
+.node-figs b { color: var(--cinnabar); font-size: 12px; letter-spacing: .5px; }
+
+/* --- 同期世界大事区 --- */
+.sync-head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  margin: 40px 0 6px; padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+.sync-head h2 { font-size: 20px; }
+.sync-head .window-note { font-size: 13px; color: var(--muted); }
+.sync-head .count {
+  margin-left: auto; font-size: 12.5px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 时间窗口可视化 */
+.window-bar {
+  position: relative; height: 34px; margin: 14px 0 20px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg,
+    rgba(178,58,44,.06) 0%, rgba(178,58,44,.14) 50%, rgba(178,58,44,.06) 100%);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.window-bar .tick {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: var(--line-2);
+}
+.window-bar .tick.mid { background: var(--cinnabar); width: 2px; }
+.window-bar .lbl {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 11.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", Consolas, monospace;
+  padding: 0 6px; white-space: nowrap;
+}
+.window-bar .lbl.left { left: 6px; }
+.window-bar .lbl.mid {
+  left: 50%; transform: translate(-50%, -50%);
+  background: var(--cinnabar); color: #fff;
+  padding: 2px 9px; border-radius: 999px; font-weight: 600;
+}
+.window-bar .lbl.right { right: 6px; }
+
+/* 区域分组 */
+.region-group { margin-bottom: 26px; }
+.region-head {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: 10px; padding-bottom: 7px;
+  border-bottom: 1px dashed var(--line-2);
+  font-size: 14px; font-weight: 600; color: var(--ink-2);
+}
+.region-head .emo { font-size: 16px; }
+.region-head .n {
+  margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 400;
+}
+
+.world-item {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 16px;
+  padding: 13px 15px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 7px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.world-item:hover { border-color: var(--line-2); box-shadow: var(--sh-1); }
+.world-item .wyear {
+  font-size: 12.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  padding-top: 2px;
+  display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
+}
+.world-item .wtitle { font-size: 14.5px; font-weight: 600; line-height: 1.55; margin-bottom: 3px; }
+.world-item .wsum { font-size: 13px; color: var(--ink-3); line-height: 1.7; }
+.world-item .wfigs { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.world-item .wfigs b { color: var(--ink-3); font-weight: 600; }
+.world-item .cdetail {
+  margin-top: 9px; padding-top: 9px;
+  border-top: 1px dashed var(--line);
+  font-size: 13px; color: var(--ink-2); line-height: 1.9;
+}
+
+/* --- 中外联动 --- */
+.link-panel {
+  margin: 34px 0;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, rgba(112,72,232,.045), rgba(112,72,232,.02));
+  border: 1px dashed rgba(112,72,232,.35);
+  border-radius: var(--radius);
+}
+.link-panel > h3 {
+  font-size: 15px; color: #5f3dc4; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 7px;
+}
+.link-item {
+  padding: 11px 0;
+  border-top: 1px solid rgba(112,72,232,.14);
+}
+.link-item:first-of-type { border-top: none; }
+.link-item .lt-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.link-item .lt-type {
+  display: inline-block; margin-right: 7px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
+  padding: 1px 7px; border-radius: 4px;
+  background: rgba(112,72,232,.13); color: #5f3dc4;
+}
+.link-item .lt-note { font-size: 13px; color: var(--ink-2); line-height: 1.75; }
+
+/* --- 上一条 / 下一条 --- */
+.pager {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin: 40px 0 20px; padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.pager a {
+  display: block; padding: 13px 17px;
+  background: var(--paper-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  transition: all .15s;
+}
+.pager a:hover { border-color: var(--ink-3); box-shadow: var(--sh-1); color: var(--ink); }
+.pager .dir { font-size: 11.5px; color: var(--muted); margin-bottom: 3px; }
+.pager .t { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.pager a.next { text-align: right; }
+.pager span.void { color: var(--muted); font-size: 13px; padding: 13px 17px; }
+
+/* ==========================================================================
+   列表页（世界大事 / 搜索）
+   ========================================================================== */
+
+.list-head { padding: 32px 0 4px; }
+.list-head h1 { font-size: 26px; margin-bottom: 8px; }
+.list-head p { color: var(--ink-3); font-size: 14px; margin: 0 0 8px; }
+
+.wl-row {
+  display: grid; grid-template-columns: 118px 1fr; gap: 18px;
+  padding: 15px 0; border-bottom: 1px solid var(--line);
+}
+.wl-row .wl-year {
+  font-size: 13px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-family: "SF Mono", "Cascadia Mono", Consolas, monospace;
+  padding-top: 2px;
+}
+.wl-row .wl-title { font-size: 15px; font-weight: 600; line-height: 1.55; margin-bottom: 4px; }
+.wl-row .wl-sum { font-size: 13.5px; color: var(--ink-3); line-height: 1.75; }
+.wl-row .wl-meta { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 7px; }
+
+.pager-bar {
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+  padding: 30px 0 10px;
+}
+.pager-bar a, .pager-bar span {
+  padding: 7px 13px; border: 1px solid var(--line-2); border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--ink-2); background: var(--paper-2);
+}
+.pager-bar a:hover { border-color: var(--ink-3); }
+.pager-bar span.cur { background: var(--ink); border-color: var(--ink); color: var(--paper-2); }
+.pager-bar .gap { border: none; background: none; color: var(--muted); }
+
+/* 搜索高亮 */
+mark { background: rgba(168,128,42,.22); color: inherit; padding: 0 2px; border-radius: 2px; }
+
+/* ==========================================================================
+   响应式
+   ========================================================================== */
+
+/* 尊重系统的「减少动态效果」设置：直接显示内容，不做淡入 */
+@media (prefers-reduced-motion: reduce) {
+  .tl-row, .dyn-head { opacity: 1 !important; transform: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+@media (max-width: 900px) {
+  /* 切换为单列 */
+  .timeline::before { left: 12px; margin-left: 0; }
+  .tl-row { grid-template-columns: 26px 1fr; gap: 0 12px; }
+  .tl-node {
+    grid-column: 1; grid-row: 1;
+    padding-top: 12px;
+  }
+  .tl-node::after {
+    left: 12px; margin-left: -5.5px; top: 22px;
+  }
+  .tl-row.key .tl-node::after { left: 12px; margin-left: -7.5px; top: 20px; }
+  .tl-year {
+    writing-mode: vertical-rl; text-orientation: sideways;
+    font-size: 11.5px; max-height: 190px; overflow: hidden;
+  }
+  .tl-cards.left, .tl-cards.right {
+    grid-column: 2; grid-row: 1;
+    align-items: stretch; text-align: left;
+  }
+  .tl-cards.left .ev-title, .tl-cards.left .ev-meta { justify-content: flex-start; }
+  .tl-cards.left .ev-card.key { border-left: 3px solid var(--cinnabar); border-right: 1px solid var(--line); }
+  .tl-cards { padding-top: 0; padding-left: 8px; }
+
+  .node-hero { grid-template-columns: 1fr; gap: 14px; }
+  .node-hero-year {
+    flex-direction: row; align-items: baseline; gap: 12px;
+    min-width: 0; padding: 0 0 12px; border-right: none; border-bottom: 1px solid var(--line);
+  }
+  .node-hero-year .big { writing-mode: horizontal-tb; font-size: 22px; }
+
+  .world-item { grid-template-columns: 1fr; gap: 6px; }
+  .world-item .wyear { flex-direction: row; align-items: center; }
+  .wl-row { grid-template-columns: 1fr; gap: 4px; }
+  .pager { grid-template-columns: 1fr; }
+  .dyn-note { padding: 0 16px; }
+}
+
+/* ==========================================================================
+   窄屏减重配套样式
+   --------------------------------------------------------------------------
+   这些类由 index.php 输出，靠 CSS 在窄屏隐藏不必要的信息。
+   隐藏而非删除，是为了让桌面端保留完整信息（同一份 HTML，两种呈现）。
+   ========================================================================== */
+
+/* 「同期暂无录入世界大事」的占位提示 */
+.ev-card.ev-empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--line-2);
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 9px 13px;
+}
+
+/* 「查看全部同期大事」按钮 */
+.tl-more {
+  align-self: flex-start;
+}
+
+@media (max-width: 900px) {
+  /* 地区（emoji + 名称）在窄屏隐藏：信息密度低，占一行不划算。
+     完整信息在节点页与 world.php 里都有。 */
+  .tl-row .ev-region { display: none; }
+
+  /* 窄屏世界大事卡只剩「年份 + 标题」，年份标签压缩 */
+  .tl-row .ev-card.world .ev-meta {
+    margin-bottom: 2px;
+  }
+  .tl-row .ev-card.world .tag-year {
+    font-size: 10.5px;
+    padding: 1px 5px;
+  }
+}

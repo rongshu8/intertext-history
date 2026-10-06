@@ -1,0 +1,62 @@
+# ---- 本地配置（含数据库密码，绝不能提交）----
+config.local.php
+config.local.example.php.bak
+
+# 安装锁：装完之后才生成，不该进仓库
+# （装进仓库的话，别人拿到的包装完直接是「安装器只读」状态，表没建、数据没有、且不报错）
+data/install.lock
+
+# ---- 旧版 PHP 种子（data/seed_part*.php）----
+# 内容已改为 data/seed/*.json。旧文件留着会**误导贡献者**：
+# 它们是 830 条，而 JSON 是 860 条，两份不一致 ——
+# 有人改完 JSON 才发现旧文件里是另一套数据，无从判断该信哪个。
+# 历史版本在 git 里，需要时可以从旧 commit 取。
+data/seed_part*.php
+
+# 编写内容时的参考文件（不是运行代码）
+data/_WORLD_EVENT_SPEC.php
+data/_existing_world_titles.txt
+
+# ---- 运行时产物 ----
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
+cache/
+*.log
+
+# ---- AI 助手的项目记忆（含生产域名与凭据，绝不能提交）----
+.workbuddy/
+
+# ---- 备份目录（本项目积累了几十个，每个都含完整源码与配置）----
+_backup_*/
+
+# ---- 工具产物 ----
+_shots/
+_preview/
+_tmp/
+__pycache__/
+*.pyc
+
+# 自检脚本的中间产物
+tools/_schema.json
+tools/_idx.json
+# 注意：tools/_probe_sqlnow.php **不能忽略** ——
+# check_sql_quotes.py 靠它调PHP 官方 tokenizer 做权威判定，删了检查就跑不了。
+
+# 临时诊断页（用完即删，不该留在工程里）
+_diag*.php
+_dbg*.php
+_s*.php
+
+# ---- 编辑器 / 系统 ----
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- 备份文件 ----
+*.bak
+*.old
+*.orig

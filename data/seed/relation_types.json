@@ -1,0 +1,24 @@
+{
+    "table": "relation_types",
+    "natural_key": "slug",
+    "rows": [
+        {
+            "slug": "cause",
+            "name": "因果",
+            "descr": "此世界事件是中国节点发生的原因或直接触发因素",
+            "sort": 10
+        },
+        {
+            "slug": "effect",
+            "name": "影响",
+            "descr": "中国节点影响了此世界事件的走向",
+            "sort": 20
+        },
+        {
+            "slug": "echo",
+            "name": "对照",
+            "descr": "二者同期发生，反映某种结构性的历史呼应",
+            "sort": 30
+        }
+    ]
+}

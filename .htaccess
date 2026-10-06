@@ -1,0 +1,52 @@
+# ==========================================================================
+# Apache 配置：目录保护 + 静态资源缓存
+# ==========================================================================
+
+# ---- 安装器保护 ----
+<Files "install.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Files>
+
+# ---- 敏感目录与文件禁止直接访问 ----
+<FilesMatch "^(config|config\.local)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "\.(sqlite|sqlite-wal|sqlite-shm|db|sql|log|ini|bak|old|orig|swp|md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# ---- 目录列表关闭 ----
+Options -Indexes
+
+# ---- data/ 与 inc/ 与 tools/ 目录禁止 Web 访问 ----
+RedirectMatch 404 ^/(.*)/data/
+RedirectMatch 404 ^/(.*)/inc/
+RedirectMatch 404 ^/(.*)/tools/
+RedirectMatch 404 ^/(.*)/cache/
+
+# ---- 静态资源缓存（部署后请把 version 改成实际版本号，如 1.0.1）----
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                "access plus 7 days"
+    ExpiresByType application/javascript  "access plus 7 days"
+    ExpiresByType image/jpeg              "access plus 30 days"
+    ExpiresByType image/png               "access plus 30 days"
+    ExpiresByType image/svg+xml           "access plus 30 days"
+    ExpiresByType image/webp              "access plus 30 days"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ---- 默认首页 ----
+DirectoryIndex index.php index.html

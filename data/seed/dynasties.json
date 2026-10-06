@@ -1,0 +1,231 @@
+{
+    "table": "dynasties",
+    "natural_key": "slug",
+    "rows": [
+        {
+            "name": "夏",
+            "slug": "xia",
+            "start_year": -2070,
+            "end_year": -1600,
+            "color": "#d9480f",
+            "summary": "文献所载中国第一个王朝，「家天下」取代「公天下」的时代起点。",
+            "sort": 10
+        },
+        {
+            "name": "商",
+            "slug": "shang",
+            "start_year": -1600,
+            "end_year": -1046,
+            "color": "#e8590c",
+            "summary": "甲骨文与青铜文明的鼎盛期，汉字与中华早期国家形态在此定型。",
+            "sort": 20
+        },
+        {
+            "name": "西周",
+            "slug": "xi_zhou",
+            "start_year": -1046,
+            "end_year": -771,
+            "color": "#f08c00",
+            "summary": "分封与宗法制度，礼乐秩序的奠基期。",
+            "sort": 30
+        },
+        {
+            "name": "春秋",
+            "slug": "chunqiu",
+            "start_year": -770,
+            "end_year": -476,
+            "color": "#fab005",
+            "summary": "五霸迭兴，礼崩乐坏，诸子百家酝酿的前夜。",
+            "sort": 40
+        },
+        {
+            "name": "战国",
+            "slug": "zhanguo",
+            "start_year": -475,
+            "end_year": -221,
+            "color": "#ffd43b",
+            "summary": "百家争鸣，兼并战争，铁器与牛耕带来的社会大变革。",
+            "sort": 50
+        },
+        {
+            "name": "秦",
+            "slug": "qin",
+            "start_year": -221,
+            "end_year": -206,
+            "color": "#495057",
+            "summary": "中国第一个中央集权统一帝国，郡县制与统一文字的确立。",
+            "sort": 60
+        },
+        {
+            "name": "西汉",
+            "slug": "xi_han",
+            "start_year": -202,
+            "end_year": 9,
+            "color": "#a61e4d",
+            "summary": "张骞凿空，丝绸之路贯通东西；儒学成为官方意识形态。",
+            "sort": 70
+        },
+        {
+            "name": "新莽",
+            "slug": "xin_mang",
+            "start_year": 9,
+            "end_year": 23,
+            "color": "#862e9c",
+            "summary": "王莽托古改制，短暂的王朝实验。",
+            "sort": 80
+        },
+        {
+            "name": "东汉",
+            "slug": "dong_han",
+            "start_year": 25,
+            "end_year": 220,
+            "color": "#c2255c",
+            "summary": "造纸术、指南针雏形出现，佛教大规模传入。",
+            "sort": 90
+        },
+        {
+            "name": "三国",
+            "slug": "sanguo",
+            "start_year": 220,
+            "end_year": 280,
+            "color": "#d6336c",
+            "summary": "魏蜀吴鼎立，人才与技术的密集爆发期。",
+            "sort": 100
+        },
+        {
+            "name": "西晋",
+            "slug": "xi_jin",
+            "start_year": 266,
+            "end_year": 316,
+            "color": "#e64980",
+            "summary": "短暂统一后陷入内乱，历史第二次大规模人口南迁。",
+            "sort": 110
+        },
+        {
+            "name": "东晋十六国",
+            "slug": "dong_jin",
+            "start_year": 317,
+            "end_year": 420,
+            "color": "#f06595",
+            "summary": "南北政权并立，民族大交融持续推进。",
+            "sort": 120
+        },
+        {
+            "name": "南北朝",
+            "slug": "nan_bei",
+            "start_year": 420,
+            "end_year": 589,
+            "color": "#e599f7",
+            "summary": "南北朝对垒，都市经济繁荣，石窟造像与佛教鼎盛。",
+            "sort": 130
+        },
+        {
+            "name": "隋",
+            "slug": "sui",
+            "start_year": 581,
+            "end_year": 618,
+            "color": "#845ef7",
+            "summary": "再度统一，开凿大运河，科举制创立。",
+            "sort": 140
+        },
+        {
+            "name": "唐",
+            "slug": "tang",
+            "start_year": 618,
+            "end_year": 907,
+            "color": "#7048e8",
+            "summary": "长安城与科举盛世，诗歌、律令与典章制度，影响波及整个东亚。",
+            "sort": 150
+        },
+        {
+            "name": "五代十国",
+            "slug": "wudai",
+            "start_year": 907,
+            "end_year": 979,
+            "color": "#9775fa",
+            "summary": "唐亡后的分裂期，政权更迭频繁但经济重心南移完成。",
+            "sort": 160
+        },
+        {
+            "name": "北宋",
+            "slug": "bei_song",
+            "start_year": 960,
+            "end_year": 1127,
+            "color": "#4c6ef5",
+            "summary": "商业革命、纸币交子、活字印刷，火药开始实用化。",
+            "sort": 170
+        },
+        {
+            "name": "南宋",
+            "slug": "nan_song",
+            "start_year": 1127,
+            "end_year": 1279,
+            "color": "#4263eb",
+            "summary": "海上贸易繁荣，理学成型，指南针应用于航海。",
+            "sort": 180
+        },
+        {
+            "name": "辽",
+            "slug": "liao",
+            "start_year": 916,
+            "end_year": 1125,
+            "color": "#5c7cfa",
+            "summary": "契丹建国，与北宋并立百余年。",
+            "sort": 185
+        },
+        {
+            "name": "金",
+            "slug": "jin",
+            "start_year": 1115,
+            "end_year": 1234,
+            "color": "#748ffc",
+            "summary": "女真灭辽克宋，北方政权大规模汉化。",
+            "sort": 190
+        },
+        {
+            "name": "元",
+            "slug": "yuan",
+            "start_year": 1271,
+            "end_year": 1368,
+            "color": "#1c7ed6",
+            "summary": "横跨欧亚的空前帝国，驿站与纸币推动全球连接。",
+            "sort": 200
+        },
+        {
+            "name": "明",
+            "slug": "ming",
+            "start_year": 1368,
+            "end_year": 1644,
+            "color": "#1098ad",
+            "summary": "郑和下西洋，重农抑商与海禁并行，小说与戏曲黄金时代。",
+            "sort": 210
+        },
+        {
+            "name": "清",
+            "slug": "qing",
+            "start_year": 1636,
+            "end_year": 1912,
+            "color": "#0c8599",
+            "summary": "疆域鼎盛与人口爆发，闭关与技术停滞，最终被工业文明撞开。",
+            "sort": 220
+        },
+        {
+            "name": "中华民国",
+            "slug": "republic",
+            "start_year": 1912,
+            "end_year": 1949,
+            "color": "#099268",
+            "summary": "帝制终结，救亡图存与现代化试验并行。",
+            "sort": 230
+        },
+        {
+            "name": "中华人民共和国",
+            "slug": "prc",
+            "start_year": 1949,
+            "end_year": 2026,
+            "color": "#2f9e44",
+            "summary": "独立自主的工业化道路，与世界经济体系深度绑定。",
+            "sort": 240
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+{
+    "format": "huwen-datapack",
+    "version": 1,
+    "generated_at": "2026-10-05T20:20:32+08:00",
+    "site": "互文 · 世界同期大事录",
+    "counts": {
+        "categories": 16,
+        "regions": 11,
+        "relation_types": 3,
+        "dynasties": 25,
+        "cn_events": 117,
+        "world_events": 669,
+        "relations": 19
+    },
+    "files": {
+        "categories.json": {
+            "rows": 16,
+            "bytes": 2381,
+            "sha256": "6c6f80a15a88527143817883a552e34674e7017bb4db65441ffd2bc37dfbb90d"
+        },
+        "regions.json": {
+            "rows": 11,
+            "bytes": 1606,
+            "sha256": "d964aeb93224eba0ea7a4042616420d2f52dfd23d602bbf1b6ab6fb262585e1b"
+        },
+        "relation_types.json": {
+            "rows": 3,
+            "bytes": 633,
+            "sha256": "e05ca1134805839c99c717600a333757015071ebd138772858c192ff42c53ed9"
+        },
+        "dynasties.json": {
+            "rows": 25,
+            "bytes": 7340,
+            "sha256": "76e1d710209022e15df0903d14463854f7abdcfdefa3d6a7d898cc79bf1ce664"
+        },
+        "cn_events.json": {
+            "rows": 117,
+            "bytes": 92866,
+            "sha256": "f60d61ff8c6d539251549831fa61e5b2e3a401276689fdca315916a5a0dc0aa4"
+        },
+        "world_events.json": {
+            "rows": 669,
+            "bytes": 751979,
+            "sha256": "c5c0ff3a7c2e9a24b952589e5ae136bf5de823ebe497de2f9aa043f68f543e73"
+        },
+        "relations.json": {
+            "rows": 19,
+            "bytes": 6068,
+            "sha256": "fed578397778a9b5beef32476a8f706261d635ba3356501501df14d60b558ece"
+        }
+    },
+    "meta": {
+        "source": "pre-replace-safety-backup"
+    }
+}

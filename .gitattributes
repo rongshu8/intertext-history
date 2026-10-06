@@ -1,0 +1,30 @@
+# 统一换行符。
+#
+# ★ 为什么必须管：Windows 上 git 默认会把 LF 转成 CRLF 提交，
+#   在 Linux/macOS 上再转回 LF —— 结果是**同一份内容在两个系统上
+#   每次 diff 都显示整文件被改**。协作时这就是灾难：
+#   你改 1 行，diff 里出现 300 行变化，根本看不出改了什么。
+#
+#   策略：仓库里一律存 LF，检出时按平台自动处理
+#   （Windows 用 CRLF，Linux/macOS 用 LF）。
+
+* text=auto eol=lf
+
+*.php  text eol=lf
+*.js   text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.txt  text eol=lf
+*.htaccess    text eol=lf
+
+# 二进制：不做任何转换
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.zip  binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
