@@ -19,6 +19,8 @@ data/_existing_world_titles.txt
 
 # 推广文（含生产站点地址，发到公开仓库等于给爬虫指路）
 公众号推广文.md
+_cover/
+.venv_tmp/
 
 # ---- 运行时产物 ----
 data/*.sqlite

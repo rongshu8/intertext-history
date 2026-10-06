@@ -46,7 +46,11 @@ def base_url():
     return env
 
 
-BASE = base_url()
+# ★ 惰性求值：这个模块常被别的工具 import（拿WS / start_chrome / new_tab），
+#   而那些工具不需要被测地址。若在 import 时就调用 base_url()，
+#   没有 BASE 也没命令行参数的调用方（截图、测量等）会直接 SystemExit。
+#   所以模块级BASE 留空，真正要用时自己调 base_url()。
+BASE = ''
 
 VIEWPORTS = [
     ("iPhone SE  320",   320, 568,  2),
